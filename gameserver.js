@@ -65,6 +65,9 @@ game_server.init = function (io) {
 	});
 	socket.on('disconnect', function () {
 	    console.log('Socket disconnecting: ' + socket.id);
+	    console.log('Removing player.');
+	    removePlayer(socket);
+	    
 	});
 	    /*
 	    var player = {host: true, socket: socket};
@@ -105,7 +108,19 @@ function getOpponent(socket) {
     }
     return false;
 }
-
+/**
+ * remove player by socket
+ */
+function removePlayer(socket) {
+    for (gameID in game_server.games) {
+	for (var i = 0; i < game_server.games[gameID].players.length; i++) {
+	    if (game_server.games[gameID].players[i].socket.id == socket.id) {
+		// Found the player. Remove.
+		game_server.games[gameID].players.splice(i, 1);
+	    }
+	}
+    }
+}
 /**
  * Create new game. At this point, allow maximally 1 game. Return false if game already exists
  **/
