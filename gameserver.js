@@ -39,15 +39,16 @@ game_server.init = function (io) {
 	// Add player to game. 
 	var player = addPlayer(gameID, socket);
 	// Inform player of registration
+	
 	if (!player) {
 	    console.log('Failed to add player.');
 	    socket.emit('registered', {success: false});
 	}
 	socket.emit('registered', {success: true, host: player.host});
 	
-	//Debug stuff, throw
+	// If there is opponent, inform that new player joined
 	opponent = getOpponent(socket);
-	if (opponent) opponent.socket.emit('test', {msg: 'kakaka'});
+	if (opponent) opponent.socket.emit('add opponent');
 	
 	// Relay game data to opponent
 	socket.on('game data', function (data) {
@@ -66,7 +67,10 @@ game_server.init = function (io) {
 	socket.on('disconnect', function () {
 	    console.log('Socket disconnecting: ' + socket.id);
 	    console.log('Removing player.');
+	    opponent = getOpponent(socket);
 	    removePlayer(socket);
+	    if (opponent) opponent.socket.emit('remove opponent');
+	    else console.log('Couldnt find opponent => failed informing about opponent gone.');
 	    
 	});
 	    /*
